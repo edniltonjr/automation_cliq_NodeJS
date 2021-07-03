@@ -8,7 +8,7 @@ const { encontrarChat, enviarMensagem } = require("../utils/cliq");
 
 module.exports = {
   enviarENG: async (req, res) => {
-    const { status } = req.query;
+    const { status, nome } = req.query;
     console.log("Obtendo Ultimos Status...");
     const { data } = await axios.get(
       `http://177.37.163.22:5000/status?status=${status}`
@@ -29,17 +29,22 @@ module.exports = {
         await page.goto(
           "https://accounts.zoho.com/signin?servicename=ZohoChat&serviceurl=/index.do"
         );
+        // await page.screenshot({ path: "example.png" });
 
-        await sleep(1000 * 2);
+        await sleep(1000 * 3);
 
-        const findChat = await encontrarChat(page);
+        console.log("\x1b[37m", "Encontrando Chat...");
+        const findChat = await encontrarChat(page, nome);
 
         if (findChat) {
-          findChat.click();
+          console.log("\x1b[32m", "Chat Encontrado :)");
+          await findChat.click();
 
           await sleep(1000 * 2);
 
-          await enviarMensagem(page, result);
+          console.log("\x1b[37m", "Enviando Mensagem");
+          await enviarMensagem(page, result, nome);
+          console.log("\x1b[32m", "Mensagem Enviada");
         }
 
         process.env.headless === "true"
@@ -52,7 +57,7 @@ module.exports = {
         });
       })();
     } else {
-      return res.json({ message: "Sem ENGS a serem enviadas" });
+      res.json({ message: "Sem ENGS a serem enviadas" });
     }
   },
 
